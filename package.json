@@ -1,0 +1,18 @@
+{
+  "name": "2024-02-csc4004-1-2-imojeomo",
+  "version": "1.0.0",
+  "description": "팀장 : 김주형\r 팀원 : 나기현, 콩고르줄오치르밧, 정유진, 장준서",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "body-parser": "^1.20.3",
+    "cors": "^2.8.5",
+    "express": "^4.21.1",
+    "mongoose": "^8.7.1"
+  }
+}
