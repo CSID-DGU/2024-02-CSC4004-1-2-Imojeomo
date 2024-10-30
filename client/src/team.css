@@ -1,0 +1,224 @@
+/* team.css */
+
+.team-container {
+    display: flex;
+    background-color: #d9f2d9;
+    font-family: Arial, sans-serif;
+    color: #4a4a4a;
+    padding: 20px;
+    height: 100vh;
+
+    border: 2px solid black;
+    /*나중에 삭제*/
+}
+
+.sidebar {
+    width: 15%;
+    padding: 10px;
+    text-align: center;
+    border: 2px solid black;
+    /*나중에 삭제*/
+}
+
+img {
+    width: 200px;
+    height: auto;
+    cursor: pointer;
+
+    border: 2px solid black;
+    /*나중에 삭제*/
+}
+
+.profile-section {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    margin-bottom: 20px;
+    margin-top: 30px;
+
+    border: 2px solid black;
+    /*나중에 삭제*/
+}
+
+.profile-icon {
+    font-size: 50px;
+    background-color: #ffffff;
+    border-radius: 50%;
+    width: 80px;
+    height: 80px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+
+    border: 2px solid black;
+    /*나중에 삭제*/
+}
+
+.user_name {
+    margin: 10px;
+    font-size: 20px;
+
+
+    border: 2px solid black;
+    /*나중에 삭제*/
+}
+
+.settings-icon {
+    margin-top: 10px;
+    font-size: 20px;
+    cursor: pointer;
+
+    border: 2px solid black;
+    /*나중에 삭제*/
+}
+
+.invite-button,
+.recommend-button {
+    background-color: #ffffff;
+    border: none;
+    padding: 10px;
+    margin: 5px 0;
+    cursor: pointer;
+    font-size: 16px;
+    width: 100%;
+    border: 2px solid black;
+    /*나중에 삭제*/
+}
+
+.main-content {
+    width: 60%;
+    text-align: center;
+    padding: 10px;
+    border: 2px solid black;
+    /*나중에 삭제*/
+}
+
+.header {
+    display: flex;
+    flex-grow: 1;
+    height: 70px;
+
+    border: 2px solid black;
+    /*나중에 삭제*/
+}
+
+.tab.active {
+    background-color: #4caf50;
+    color: #ffffff;
+    flex-grow: 0;
+    margin-right: 20px;
+    padding: 15px 25px;
+
+    border: 2px solid black;
+    /*나중에 삭제*/
+}
+
+.tab {
+    padding: 10px 20px;
+    font-size: 18px;
+    cursor: pointer;
+    border: none;
+    background-color: #ffffff;
+    flex-grow: 1;
+    border: 2px solid black;
+    /*나중에 삭제*/
+
+}
+
+
+.calendar {
+    background-color: #ffffff;
+    padding: 20px;
+    margin-top: 20px;
+    border-radius: 8px;
+    border: 2px solid black;
+    /*나중에 삭제*/
+
+}
+
+.month {
+    text-align: left;
+    font-size: 70px;
+    color: #4caf50;
+    border: 2px solid black;
+    /*나중에 삭제*/
+
+}
+
+.days {
+    display: flex;
+    justify-content: space-around;
+    font-weight: bold;
+    margin-top: 10px;
+
+    border: 2px solid black;
+    /*나중에 삭제*/
+
+}
+
+.dates {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 10px;
+    margin-top: 10px;
+    border: 2px solid black;
+    /*나중에 삭제*/
+
+}
+
+.date {
+    padding: 15px;
+    background-color: #e0e0e0;
+    border-radius: 4px;
+    text-align: center;
+
+}
+
+.date.highlight {
+    background-color: #9e9e9e;
+
+}
+
+.notifications {
+    width: 20%;
+    padding: 10px;
+
+    border: 2px solid black;
+    /*나중에 삭제*/
+
+}
+
+.board {
+    background-color: white;
+    height: 80vh;
+
+    border: 2px solid black;
+    /*나중에 삭제*/
+}
+
+.notifications h2 {
+    font-size: 24px;
+    margin-bottom: 10px;
+    text-align: center;
+    border: 2px solid black;
+    /*나중에 삭제*/
+
+}
+
+.notifications ul {
+    list-style-type: none;
+    padding: 0;
+    border: 2px solid black;
+    /*나중에 삭제*/
+
+}
+
+.notifications li {
+    padding: 10px;
+    background-color: #e8f5e9;
+    margin-bottom: 5px;
+
+
+}
