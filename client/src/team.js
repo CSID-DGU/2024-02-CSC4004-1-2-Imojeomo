@@ -1,12 +1,18 @@
 // team.js
 import React from "react";
 import "./team.css";
+import { Link } from 'react-router-dom';
+import MyCalendar from './MyCalendar';
+
+
 
 function Team() {
     return (
         <div className="team-container">
             <aside className="sidebar">
-                <img src="imo_logo_small.png" alt="IMO 로고" />
+                <Link to="/">
+                    <img src="/imo_logo_small.png" alt="IMO 로고" />
+                </Link>
                 <div className="profile-section">
                     <div className="profile-icon">👤</div>
                     <div className="user_name">유저이름</div>
@@ -23,23 +29,7 @@ function Team() {
                 </div>
 
                 <div className="calendar">
-                    <div className="month">10</div>
-                    <div className="days">
-                        <div className="day">일</div>
-                        <div className="day">월</div>
-                        <div className="day">화</div>
-                        <div className="day">수</div>
-                        <div className="day">목</div>
-                        <div className="day">금</div>
-                        <div className="day">토</div>
-                    </div>
-                    <div className="dates">
-                        {[...Array(31).keys()].map((day) => (
-                            <div className={`date ${day === 17 ? 'highlight' : ''}`} key={day}>
-                                {day + 1}
-                            </div>
-                        ))}
-                    </div>
+                    <MyCalendar />
                 </div>
             </main>
 
