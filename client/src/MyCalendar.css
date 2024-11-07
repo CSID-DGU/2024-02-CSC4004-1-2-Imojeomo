@@ -41,3 +41,11 @@
     padding: 10px;
     /* 날짜 패딩 */
 }
+
+.rbc-event {
+    min-width: 100%;
+    max-width: 100%;
+
+
+    box-sizing: border-box;
+}
