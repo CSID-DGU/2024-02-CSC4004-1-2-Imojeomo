@@ -2,11 +2,12 @@ import React, { useEffect, useState } from 'react';
 import { Calendar, momentLocalizer } from 'react-big-calendar';
 import moment from 'moment';
 import axios from 'axios';
-import 'moment/locale/ko'; // 한국어 로케일 불러오기
+import 'moment/locale/ko';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
 import './MyCalendar.css';
 
 const localizer = momentLocalizer(moment);
+
 
 const messages = {
   allDay: '종일',
@@ -15,6 +16,7 @@ const messages = {
   today: '오늘',
   month: '캘린더',
   week: '시간표',
+
 };
 
 const CustomToolbar = (toolbar) => {
@@ -53,10 +55,9 @@ const CustomEvent = ({ event }) => {
 };
 
 const formats = {
-  dayFormat: 'dddd',
+  dayFormat: 'dddd', // 요일 형식
   timeGutterFormat: (date) => moment(date).format('A hh:mm'),
-  eventTimeRangeFormat: ({ start, end }) => {
-    return `${moment(start).format('A hh:mm')} - ${moment(end).format('A hh:mm')}`;
+  eventTimeRangeFormat: () => {
   },
 };
 
@@ -70,8 +71,10 @@ const MyCalendar = () => {
         const formattedEvents = response.data.map(event => ({
           title: event.title,
           start: new Date(event.start),
-          end: new Date(event.end),
+          end: new Date(event.end)
         }));
+        console.log('Formatted Events:', formattedEvents);
+
         setEvents(formattedEvents);
       } catch (error) {
         console.error('Error fetching events:', error);
@@ -80,6 +83,7 @@ const MyCalendar = () => {
 
     fetchEvents();
   }, []);
+
 
   return (
     <div>

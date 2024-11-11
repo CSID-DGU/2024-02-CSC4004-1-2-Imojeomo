@@ -7,7 +7,8 @@ import Profile from './profile';
 import Team from './team';
 import Schedule from './schedule';
 import Place from './place';
-import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import Signup from './signup';
+import { BrowserRouter as Router, Route, Routes, Link } from 'react-router-dom';
 
 function App() {
   return (
@@ -20,6 +21,7 @@ function App() {
         <Route path="/team" element={<Team />} />
         <Route path="/schedule" element={<Schedule />} />
         <Route path="/place" element={<Place />} />
+        <Route path="/signup" element={<Signup />} />
       </Routes>
     </Router>
   );
