@@ -10,7 +10,7 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-left: 50px;
+    margin-left: 20px;
     padding: 10px;
     background-color: #f1f5f9;
     font-size: 30px;
@@ -51,17 +51,11 @@
     display: flex;
     align-items: center;
     gap: 0px;
-    margin-right: 15px
+    margin-right: 15px;
 }
 
 .user-profile .profile-icon {
     font-size: 40px;
-}
-
-.user-profile .settings-icon {
-    font-size: 20px;
-    margin-top: 45px;
-    border: none;
 }
 
 .content {
@@ -93,9 +87,17 @@
     border-radius: 7px;
 }
 
-.label.red { background-color: #f87171; }
-.label.green { background-color: #34d399; }
-.label.blue { background-color: #60a5fa; }
+.label.red {
+    background-color: #f87171;
+}
+
+.label.green {
+    background-color: #34d399;
+}
+
+.label.blue {
+    background-color: #60a5fa;
+}
 
 .add-btn {
     margin-top: 5px;
@@ -149,7 +151,6 @@
 .event-details li {
     margin-bottom: 5px;
     margin-top: 20px;
-    
 }
 
 .calendar-toolbar {

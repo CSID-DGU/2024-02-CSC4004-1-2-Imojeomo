@@ -2,12 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { Calendar, momentLocalizer } from 'react-big-calendar';
 import moment from 'moment';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
-import { useNavigate } from 'react-router-dom'; // useNavigate 추가
+import { useNavigate } from 'react-router-dom';
 import './main.css';
 
 const localizer = momentLocalizer(moment);
 
-// 커스텀 Toolbar 컴포넌트
 const CustomToolbar = (toolbar) => {
   const goToPreviousMonth = () => {
     toolbar.onNavigate('PREV');
@@ -33,7 +32,7 @@ const CustomToolbar = (toolbar) => {
 const MainPage = () => {
   const [events, setEvents] = useState([]);
   const [currentDate, setCurrentDate] = useState(new Date());
-  const navigate = useNavigate(); // useNavigate 훅 사용
+  const navigate = useNavigate();
 
   const handleSelectSlot = ({ start, end }) => {
     const title = window.prompt('새로운 일정을 입력하세요');
@@ -80,7 +79,11 @@ const MainPage = () => {
   };
 
   const goToAddTeamPage = () => {
-    navigate('/add-team'); // /add-team 경로로 이동
+    navigate('/add-team');
+  };
+
+  const goToProfilePage = () => {
+    navigate('/profile');
   };
 
   return (
@@ -90,8 +93,7 @@ const MainPage = () => {
           <h2>{moment(currentDate).format('M월')}</h2>
         </div>
         <div className="user-profile">
-          <div className="profile-icon">👤</div>
-          <div className="settings-icon">⚙️</div>
+          <div className="profile-icon" onClick={goToProfilePage}>👤</div>
         </div>
       </header>
       <div className="content">
