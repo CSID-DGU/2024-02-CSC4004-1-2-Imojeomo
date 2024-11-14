@@ -60,9 +60,6 @@ app.post('/api/login', async (req, res) => {
     }
 })
 
-
-
-
 /* 스케줄 스키마 */
 const eventSchema = new mongoose.Schema({
     title: String,
@@ -79,8 +76,40 @@ app.get('/api/events', async (req, res) => {
     } catch (err) {
         res.status(500).json({ message: err.message });
     }
-})
+});
 
+/* 스케줄 입력하기 */
+app.post('/api/events', async (req, res) => {
+    const { title, start, end } = req.body;
+    try {
+        const newEvent = new Event({ title, start, end });
+        await newEvent.save();
+        res.status(201).json(newEvent);
+    } catch (error) {
+        res.status(500).json({ message: '일정 추가 오류' });
+    }
+});
+
+/* 스케줄 삭제하기 */
+app.delete('/api/events/:id', async (req, res) => {
+    try {
+        const { id } = req.params;
+        const result = await Event.findByIdAndDelete(id);
+        if (result) {
+            res.status(200).json({ message: 'Event deleted successfully' });
+        } else {
+            res.status(400).json({ message: 'Event not found' });
+        }
+
+    } catch (error) {
+        console.error('Errir deleting event:', error);
+        res.status(500).json({ message: 'Error deleting event' });
+    }
+});
+
+
+
+/* 서버 시작 */
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
 })
