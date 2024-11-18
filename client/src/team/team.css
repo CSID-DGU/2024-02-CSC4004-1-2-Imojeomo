@@ -1,4 +1,68 @@
+body {
+    background-color: #f2f2f2;
+}
+
+
 .team-container {
+    display: flex;
+    flex-direction: column;
+    width: 180vh;
+    height: 100vh;
+}
+
+
+.team-header {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    width: 100%;
+    height: 13%;
+}
+
+.logo-link {
+    width: 90%;
+    margin-left: 3%;
+}
+
+.profile-section {
+    width: 10%
+}
+
+
+.main-content {
+    display: flex;
+    flex-direction: row;
+}
+
+.calendar {
+    width: 75%;
+    margin-left: 2%;
+}
+
+.notifications {
+    text-align: center;
+    background-color: white;
+    width: 25%;
+    border-radius: 10px;
+}
+
+.board-title {
+    margin-top: 30px;
+}
+
+.board ul {
+    margin-top: 20px;
+    list-style: none;
+    padding: 0;
+}
+
+.board ul li {
+    margin: 10px 0;
+}
+
+
+
+/* .team-container {
     display: flex;
     height: 100vh;
     font-family: Arial, sans-serif;
@@ -7,8 +71,7 @@
 }
 
 .sidebar {
-    width: 15%;
-    background-color: #ffffff;
+    width: 100%;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -65,8 +128,7 @@
 }
 
 .main-content {
-    width: 65%;
-    padding: 20px;
+    width: 100%;
 }
 
 .header {
@@ -95,7 +157,7 @@
     background-color: #ffffff;
     padding: 20px;
     border-radius: 8px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    border: solid 1px black;
 }
 
 .notifications {
@@ -132,4 +194,4 @@
     border-radius: 4px;
     font-size: 14px;
     color: #333;
-}
+} */

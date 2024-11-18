@@ -20,6 +20,7 @@ const messages = {
 
 };
 
+
 const CustomToolbar = (toolbar) => {
   const goToBack = () => {
     toolbar.onNavigate('PREV');
@@ -31,9 +32,20 @@ const CustomToolbar = (toolbar) => {
 
   return (
     <div className="custom-toolbar">
-      <button onClick={goToBack}>{messages.previous}</button>
-      <span className="custom-date">{moment(toolbar.date).format('YYYY년 MM월')}</span>
-      <button onClick={goToNext}>{messages.next}</button>
+      <button onClick={goToBack} className='leftButton'>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24">
+          <path
+            d="M20.494,7.968l-9.54-7A5,5,0,0,0,3,5V19a5,5,0,0,0,7.957,4.031l9.54-7a5,5,0,0,0,0-8.064Zm-1.184,6.45-9.54,7A3,3,0,0,1,5,19V5A2.948,2.948,0,0,1,6.641,2.328,3.018,3.018,0,0,1,8.006,2a2.97,2.97,0,0,1,1.764.589l9.54,7a3,3,0,0,1,0,4.836Z"
+            transform="scale(-1, 1) translate(-24, 0)"
+          />
+        </svg>
+      </button>
+      <span className="custom-date">{moment(toolbar.date).format('MM월')}</span>
+      <button onClick={goToNext} className='rightButton'>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24">
+          <path d="M20.494,7.968l-9.54-7A5,5,0,0,0,3,5V19a5,5,0,0,0,7.957,4.031l9.54-7a5,5,0,0,0,0-8.064Zm-1.184,6.45-9.54,7A3,3,0,0,1,5,19V5A2.948,2.948,0,0,1,6.641,2.328,3.018,3.018,0,0,1,8.006,2a2.97,2.97,0,0,1,1.764.589l9.54,7a3,3,0,0,1,0,4.836Z" />
+        </svg>
+      </ button>
       <button onClick={() => toolbar.onView('month')}>{messages.month}</button>
       <button onClick={() => toolbar.onView('week')}>{messages.week}</button>
     </div>
@@ -193,8 +205,3 @@ const MyCalendar = () => {
 
 
 export default MyCalendar;
-
-/*해야될거
-1. 스케줄 겹치게 저장
-2. 고정 주간 스케줄 (수업시간표)
-나머진 팀 생성 기능 만들고 ㅇㅇ */

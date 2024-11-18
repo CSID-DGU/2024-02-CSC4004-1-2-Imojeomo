@@ -1,6 +1,5 @@
 body {
     font-family: 'NanumSquareRound', sans-serif;
-    /* Roboto 폰트를 설정 */
 
 }
 
@@ -155,4 +154,21 @@ body {
 .event-modal button.save-button {
     background-color: #6c757d;
     color: #fff;
+}
+
+
+.custom-date {
+    font-weight: bold;
+    font-size: 35px;
+}
+
+.leftButton,
+.rightButton {
+    border: none;
+    cursor: pointer;
+}
+
+.custom-toolbar {
+    position: relative;
+    top: -25px;
 }
