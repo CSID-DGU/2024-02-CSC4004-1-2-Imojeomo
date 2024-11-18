@@ -20,7 +20,6 @@ const messages = {
 
 };
 
-
 const CustomToolbar = (toolbar) => {
   const goToBack = () => {
     toolbar.onNavigate('PREV');
@@ -82,13 +81,14 @@ const MyCalendar = () => {
   const [selectedSlot, setSelectedSlot] = useState(null);
   const [selectedEvent, setSelectedEvent] = useState(null);
 
+  const [view, setView] = useState('month'); // 현재 보기를 추적
+
   useEffect(() => {
     const fetchEvents = async () => {
       try {
         const response = await axios.get('http://localhost:5000/api/events');
         const formattedEvents = response.data.map(event => ({
-          _id: event._id,
-          title: event.title,
+          ...event,
           start: new Date(event.start),
           end: new Date(event.end)
         }));
@@ -107,23 +107,26 @@ const MyCalendar = () => {
   };
 
   const handleSaveEvent = async () => {
-    if (!newEventTitle) return;
+    if (!newEventTitle || !selectedSlot || !selectedSlot.start || !selectedSlot.end) {
+      console.error('이벤트 데이터가 올바르지 않습니다.');
+      return;
+    }
 
     const newEvent = {
       title: newEventTitle,
-      start: selectedSlot.start,
-      end: selectedSlot.end,
+      start: selectedSlot.start.toISOString(),
+      end: selectedSlot.end.toISOString(),
     };
 
     try {
       const response = await axios.post('http://localhost:5000/api/events', newEvent);
-      setEvents([...events, { ...newEvent, _id: response.data._id }]);
+      setEvents([...events, { ...newEvent, _id: response.data._id, start: selectedSlot.start, end: selectedSlot.end }]);
+      setNewEventTitle('');
+      setModalIsOpen(false);
+
     } catch (error) {
       console.error('Error saving new event:', error);
     }
-
-    setNewEventTitle('');
-    setModalIsOpen(false);
   };
 
   const handleSelectEvent = (event) => {
@@ -139,6 +142,7 @@ const MyCalendar = () => {
       } else {
         console.error('Selected event ID is missing');
       }
+
     } catch (error) {
       console.error('Error deleting event:', error);
     }
@@ -146,11 +150,20 @@ const MyCalendar = () => {
     setDeleteModalIsOpen(false);
   }
 
+  // 월간 보기에서 제외할 조건 설정
+  const filteredEvents = events.filter(event => {
+    if (view === 'month') {
+      // 특정 조건을 설정 (예: 제목에 "회의"가 포함된 일정 제외)
+      return !event.title.includes('회의');
+    }
+    return true; // 월간 뷰가 아닌 경우 모든 이벤트를 포함
+  });
+
   return (
     <div>
       <Calendar
         localizer={localizer}
-        events={events}
+        events={filteredEvents}
         startAccessor="start"
         endAccessor="end"
         selectable
@@ -167,6 +180,7 @@ const MyCalendar = () => {
         max={new Date(2024, 10, 4, 19, 0)}
         onSelectSlot={handleSelectSlot}
         onSelectEvent={handleSelectEvent}
+        onView={(newView) => setView(newView)}
       />
 
       <Modal
