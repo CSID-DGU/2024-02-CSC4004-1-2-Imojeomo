@@ -54,6 +54,7 @@ const CustomToolbar = (toolbar) => {
 const CustomEvent = ({ event }) => {
   return (
     <div style={{
+      backgroundColor: event.isRecurring ? '#FFD700' : '#9ACD4C', /*정기 일정은 노란색으로*/
       display: 'flex',
       justifyContent: 'center',
       alignItems: 'center',
@@ -65,6 +66,8 @@ const CustomEvent = ({ event }) => {
     </div>
   );
 };
+
+
 
 const formats = {
   dayFormat: 'dddd', // 요일 형식
@@ -82,6 +85,7 @@ const MyCalendar = () => {
   const [selectedEvent, setSelectedEvent] = useState(null);
 
   const [view, setView] = useState('month'); // 현재 보기를 추적
+  const [isRecurring, setIsRecurring] = useState(false);
 
   useEffect(() => {
     const fetchEvents = async () => {
@@ -116,12 +120,14 @@ const MyCalendar = () => {
       title: newEventTitle,
       start: selectedSlot.start.toISOString(),
       end: selectedSlot.end.toISOString(),
+      isRecurring,
     };
 
     try {
       const response = await axios.post('http://localhost:5000/api/events', newEvent);
       setEvents([...events, { ...newEvent, _id: response.data._id, start: selectedSlot.start, end: selectedSlot.end }]);
       setNewEventTitle('');
+      setIsRecurring(false);
       setModalIsOpen(false);
 
     } catch (error) {
@@ -150,13 +156,12 @@ const MyCalendar = () => {
     setDeleteModalIsOpen(false);
   }
 
-  // 월간 보기에서 제외할 조건 설정
+  /* 월간 뷰에서 제외할 일정 */
   const filteredEvents = events.filter(event => {
     if (view === 'month') {
-      // 특정 조건을 설정 (예: 제목에 "회의"가 포함된 일정 제외)
-      return !event.title.includes('회의');
+      return !event.isRecurring;
     }
-    return true; // 월간 뷰가 아닌 경우 모든 이벤트를 포함
+    return true;
   });
 
   return (
@@ -174,7 +179,7 @@ const MyCalendar = () => {
           toolbar: CustomToolbar,
         }}
 
-        dayLayoutAlgorithm="no-overlap"
+        dayLayoutAlgorithm='overlap'
         style={{ height: '66vh', margin: '50px' }}
         min={new Date(2024, 10, 4, 9, 0)}
         max={new Date(2024, 10, 4, 19, 0)}
@@ -196,6 +201,14 @@ const MyCalendar = () => {
           placeholder="일정 제목 입력"
           value={newEventTitle}
           onChange={(e) => setNewEventTitle(e.target.value)} />
+        <label>
+          <input
+            type="checkbox"
+            checked={isRecurring}
+            onChange={(e) => setIsRecurring(e.target.checked)}
+          />
+          정기적 일정
+        </label>
         <button onClick={handleSaveEvent} className="save-button">저장</button>
         <button onClick={() => setModalIsOpen(false)} className="cancel-button">취소</button>
       </Modal>

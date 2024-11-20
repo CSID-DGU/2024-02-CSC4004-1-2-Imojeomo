@@ -65,6 +65,7 @@ const eventSchema = new mongoose.Schema({
     title: String,
     start: Date,
     end: Date,
+    isRecurring: { type: Boolean, default: false },
 });
 const Event = mongoose.model('Event', eventSchema);
 
@@ -80,9 +81,9 @@ app.get('/api/events', async (req, res) => {
 
 /* 스케줄 입력하기 */
 app.post('/api/events', async (req, res) => {
-    const { title, start, end } = req.body;
+    const { title, start, end, isRecurring } = req.body;
     try {
-        const newEvent = new Event({ title, start, end });
+        const newEvent = new Event({ title, start, end, isRecurring });
         await newEvent.save();
         res.status(201).json(newEvent);
     } catch (error) {

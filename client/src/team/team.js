@@ -1,9 +1,11 @@
-import React from "react";
+import React, { useState } from "react";
 import "./team.css";
 import { Link } from 'react-router-dom';
 import MyCalendar from '../MyCalendar/MyCalendar';
 
 function Team() {
+
+
     return (
         <div className="team-container">
 
@@ -20,7 +22,12 @@ function Team() {
 
             <main className="main-content">
                 <div className="calendar">
-                    <MyCalendar />
+                    <div className="team-buttons">
+                        <button className="team-button">+</button>
+                    </div>
+                    <div className="mycalendar">
+                        <MyCalendar />
+                    </div>
                 </div>
 
                 <aside className="notifications">
@@ -37,6 +44,7 @@ function Team() {
                     </div>
                 </aside>
             </main>
+
 
         </div>
     );
