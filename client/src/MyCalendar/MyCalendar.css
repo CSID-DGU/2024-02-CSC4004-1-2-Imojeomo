@@ -36,7 +36,9 @@ body {
 }
 
 .rbc-month-view {
+    background-color: #f2f2f2;
     border: none;
+
 }
 
 .rbc-month-view .rbc-event,
@@ -79,7 +81,7 @@ body {
 
 .rbc-day-bg {
     background-color: white;
-    border-radius: 5%;
+    border-radius: 8%;
     margin: 2px;
     box-shadow: 1px 1px 1px rgba(238, 238, 238, 0.1), -1px -1px 1px rgba(255, 255, 255, 0.1);
     border-bottom: none;
@@ -157,7 +159,7 @@ body {
 
 .event-modal button.delete-button,
 .event-modal button.cancel-button {
-    background-color: #d9534f;
+    background-color: #d35940;
     color: #fff;
 }
 
@@ -183,4 +185,12 @@ body {
 .rbc-time-view .rbc-event:hover {
     opacity: 1;
     filter: brightness(1.3);
+}
+
+.rbc-time-view {
+    background-color: #f2f2f2;
+}
+
+.recurring_check {
+    margin-left: 10px;
 }

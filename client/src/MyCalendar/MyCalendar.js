@@ -9,7 +9,6 @@ import './MyCalendar.css';
 
 const localizer = momentLocalizer(moment);
 
-
 const messages = {
   allDay: '종일',
   previous: '<',
@@ -68,7 +67,6 @@ const CustomEvent = ({ event }) => {
 };
 
 
-
 const formats = {
   dayFormat: 'dddd', // 요일 형식
   timeGutterFormat: (date) => moment(date).format('A hh:mm'),
@@ -76,7 +74,7 @@ const formats = {
   },
 };
 
-const MyCalendar = () => {
+const MyCalendar = ({ user }) => {
   const [events, setEvents] = useState([]);
   const [modalIsOpen, setModalIsOpen] = useState(false);
   const [deleteModalIsOpen, setDeleteModalIsOpen] = useState(false);
@@ -89,8 +87,12 @@ const MyCalendar = () => {
 
   useEffect(() => {
     const fetchEvents = async () => {
+      if (!user) return;
+
       try {
-        const response = await axios.get('http://localhost:5000/api/events');
+        const response = await axios.get('http://localhost:5000/api/events', {
+          params: { userId: user._id }
+        });
         const formattedEvents = response.data.map(event => ({
           ...event,
           start: new Date(event.start),
@@ -103,7 +105,7 @@ const MyCalendar = () => {
     };
 
     fetchEvents();
-  }, []);
+  }, [user]);
 
   const handleSelectSlot = (slotInfo) => {
     setSelectedSlot(slotInfo);
@@ -111,7 +113,7 @@ const MyCalendar = () => {
   };
 
   const handleSaveEvent = async () => {
-    if (!newEventTitle || !selectedSlot || !selectedSlot.start || !selectedSlot.end) {
+    if (!newEventTitle || !selectedSlot || !selectedSlot.start || !selectedSlot.end || !user) {
       console.error('이벤트 데이터가 올바르지 않습니다.');
       return;
     }
@@ -121,10 +123,14 @@ const MyCalendar = () => {
       start: selectedSlot.start.toISOString(),
       end: selectedSlot.end.toISOString(),
       isRecurring,
+      userId: user._id,
     };
 
     try {
+      console.log('저장 요청 데이터:', newEvent);
       const response = await axios.post('http://localhost:5000/api/events', newEvent);
+      console.log('서버 응답:', response.data);
+
       setEvents([...events, { ...newEvent, _id: response.data._id, start: selectedSlot.start, end: selectedSlot.end }]);
       setNewEventTitle('');
       setIsRecurring(false);
@@ -203,6 +209,7 @@ const MyCalendar = () => {
           onChange={(e) => setNewEventTitle(e.target.value)} />
         <label>
           <input
+            className="recurring_check"
             type="checkbox"
             checked={isRecurring}
             onChange={(e) => setIsRecurring(e.target.checked)}

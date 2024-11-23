@@ -54,7 +54,10 @@ app.post('/api/login', async (req, res) => {
         if (!isMatch) {
             return res.status(400).json({ message: '비밀번호가 틀렸습니다.' });
         }
-        res.json({ message: '로그인 성공' });
+        res.json({
+            message: '로그인 성공',
+            user: { _id: user._id, name: user.name, username: user.username }
+        });
     } catch (error) {
         res.status(500).json({ message: '서버 오류' });
     }
@@ -66,13 +69,18 @@ const eventSchema = new mongoose.Schema({
     start: Date,
     end: Date,
     isRecurring: { type: Boolean, default: false },
+    userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
 });
 const Event = mongoose.model('Event', eventSchema);
 
 /* 스케줄 가져오기 */
 app.get('/api/events', async (req, res) => {
+    const { userId } = req.query;
     try {
-        const events = await Event.find();
+        if (!userId) {
+            return res.status(400).json({ message: '사용자 Id가 필요합니다.' });
+        }
+        const events = await Event.find({ userId });
         res.json(events);
     } catch (err) {
         res.status(500).json({ message: err.message });
@@ -81,9 +89,14 @@ app.get('/api/events', async (req, res) => {
 
 /* 스케줄 입력하기 */
 app.post('/api/events', async (req, res) => {
-    const { title, start, end, isRecurring } = req.body;
+    const { title, start, end, isRecurring, userId } = req.body;
+
+    if (!title || !start || !end || !userId) {
+        return res.status(400).json({ message: '필수 필드가 누락되었습니다.' });
+    }
+
     try {
-        const newEvent = new Event({ title, start, end, isRecurring });
+        const newEvent = new Event({ title, start, end, isRecurring, userId });
         await newEvent.save();
         res.status(201).json(newEvent);
     } catch (error) {

@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
-import './login.css';
+import './login.css'
 
-function Login() {
+function Login({ setUser }) {
     const [isSignUpMode, setIsSignUpMode] = useState(false);
     const [formData, setFormData] = useState({
         name: '',
@@ -30,17 +30,20 @@ function Login() {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+
         if (!isSignUpMode) {
             // 로그인 처리
             try {
-                const response = await axios.post('http://localhost:5000/api/login', {
-                    username: formData.username,
-                    password: formData.password,
-                });
-                console.log(response.data);
-                navigate('/');
+                const response = await axios.post('http://localhost:5000/api/login', formData);
+                console.log('로그인 성공: ', response.data);
+                const user = response.data.user;
+                localStorage.setItem('user', JSON.stringify(user));
+
+                setUser(user);
+                navigate('/team');
             } catch (error) {
                 console.error('로그인 실패:', error.response?.data.message || error.message);
+                alert('로그인 실패: ' + (error.response?.data.message || error.message));
             }
         } else {
             // 회원가입 처리
