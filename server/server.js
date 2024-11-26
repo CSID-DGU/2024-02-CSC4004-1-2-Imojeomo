@@ -75,15 +75,28 @@ const Event = mongoose.model('Event', eventSchema);
 
 /* 스케줄 가져오기 */
 app.get('/api/events', async (req, res) => {
-    const { userId } = req.query;
+    const { teamId, userId } = req.query;
+
     try {
-        if (!userId) {
-            return res.status(400).json({ message: '사용자 Id가 필요합니다.' });
+        let events;
+
+        if (teamId) {
+            const team = await Team.findById(teamId).populate('members');
+            if (!team) {
+                return res.status(404).json({ message: '팀을 찾을 수 없습니다.' });
+            }
+            events = await Event.find({ userId: { $in: team.members.map(member => member._id) } });
+            return res.json(events);
+        } else if (userId) {
+            events = await Event.find({ userId });
+        } else {
+            return res.status(400).json({ message: '팀 Id나 사용자 Id가 필요합니다.' });
         }
-        const events = await Event.find({ userId });
+
         res.json(events);
     } catch (err) {
-        res.status(500).json({ message: err.message });
+        console.error(err);
+        res.status(500).json({ message: '일정 가져오기 실패' });
     }
 });
 
@@ -118,6 +131,115 @@ app.delete('/api/events/:id', async (req, res) => {
     } catch (error) {
         console.error('Errir deleting event:', error);
         res.status(500).json({ message: 'Error deleting event' });
+    }
+});
+
+
+/* 팀 스케마 */
+const teamSchema = new mongoose.Schema({
+    name: { type: String, required: true, unique: true },
+    creatorId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+    members: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
+    inviteCode: { type: String },
+    createdAt: { type: Date, default: Date.now },
+});
+const Team = mongoose.model('Team', teamSchema);
+
+/* 팀 생성하기 */
+app.post('/api/teams', async (req, res) => {
+    const { name, creatorId } = req.body;
+
+    if (!name || !creatorId) {
+        return res.status(400).json({ message: '팀 이름과 생성자가 필요합니다.' });
+    }
+
+    try {
+        const newTeam = new Team({ name, creatorId, members: [creatorId] });
+        await newTeam.save();
+        res.status(201).json(newTeam);
+    } catch (error) {
+        console.error('팀 생성 오류:', error);
+        res.status(500).json({ message: '팀 생성에 실패했습니다.' });
+    }
+});
+
+/* 팀 가져오기 */
+app.get('/api/teams', async (req, res) => {
+    const { userId } = req.query;
+
+    if (!userId) {
+        return res.status(400).json({ message: 'userId가 필요합니다.' });
+    }
+
+    try {
+        const teams = await Team.find({ members: userId });
+        res.json(teams);
+    } catch (err) {
+        console.error('팀 목록 가져오기 오류:', err);
+        res.status(500).json({ message: '팀 목록 가져오기 실패' });
+    }
+});
+
+/* 참여자 목록 가져오기 */
+app.get('/api/teams/:teamId/members', async (req, res) => {
+    const { teamId } = req.params;
+
+    try {
+        const team = await Team.findById(teamId).populate('members', 'name _id'); // 필드명 수정
+        if (!team) {
+            return res.status(404).json({ message: '팀을 찾을 수 없습니다.' });
+        }
+        res.json(team.members); // 참여자 목록 반환
+    } catch (err) {
+        console.error('멤버 목록 가져오기 오류:', err);
+        res.status(500).json({ message: '멤버 목록 가져오기 실패' });
+    }
+});
+
+/* 초대 */
+const crypto = require('crypto');
+
+/* 초대 코드 생성 */
+app.post('/api/teams/:teamId/invite-code', async (req, res) => {
+    const { teamId } = req.params;
+
+    try {
+        const team = await Team.findById(teamId);
+        if (!team) {
+            return res.status(404).json({ message: '팀을 찾을 수 없습니다.' });
+        }
+
+        const inviteCode = crypto.randomBytes(3).toString('hex').toUpperCase();
+
+        team.inviteCode = inviteCode;
+        await team.save();
+
+        res.json({ inviteCode });
+    } catch (err) {
+        console.error('초대 코드 생성 오류:', err);
+        res.status(500).json({ message: '초대 코드 생성 실패' });
+    }
+});
+
+/* 참가 */
+app.post('/api/teams/join', async (req, res) => {
+    const { inviteCode, userId } = req.body;
+
+    try {
+        const team = await Team.findOne({ inviteCode });
+        if (!team) {
+            return res.status(404).json({ message: '유효하지 않은 초대 코드입니다' });
+        }
+
+        if (!team.members.includes(userId)) {
+            team.members.push(userId);
+            await team.save();
+        }
+
+        res.status(200).json({ message: '팀 참가 성공', teamId: team._id });
+    } catch (err) {
+        console.error('팀 참가 오류:', err);
+        res.status(500).json({ message: '팀 참가 실패' });
     }
 });
 
