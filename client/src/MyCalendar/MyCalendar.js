@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import { Calendar, momentLocalizer } from 'react-big-calendar';
 import moment from 'moment';
 import axios from 'axios';
@@ -66,6 +66,14 @@ const CustomEvent = ({ event }) => {
   );
 };
 
+const CustomHeader = ({ date }) => {
+  return (
+    <div className="custom-header">
+      <div className="date">{moment(date).format('D일')}</div>
+      <div className="day">{moment(date).format('ddd')}</div>
+    </div>
+  );
+};
 
 const formats = {
   dayFormat: 'dddd', // 요일 형식
@@ -74,7 +82,14 @@ const formats = {
   },
 };
 
-const MyCalendar = ({ user }) => {
+const lightColors = {
+  '#63A0CC': '#C0D9EA',
+  '#9ACD4C': '#EAF4DB',
+  '#D35940': '#EDBCB2',
+  '#cecece': '#f2f2f2',
+};
+
+const MyCalendar = ({ user, teamId, teamColor }) => {
   const [events, setEvents] = useState([]);
   const [modalIsOpen, setModalIsOpen] = useState(false);
   const [deleteModalIsOpen, setDeleteModalIsOpen] = useState(false);
@@ -82,22 +97,30 @@ const MyCalendar = ({ user }) => {
   const [selectedSlot, setSelectedSlot] = useState(null);
   const [selectedEvent, setSelectedEvent] = useState(null);
 
-  const [view, setView] = useState('month'); // 현재 보기를 추적
+  const [view, setView] = useState('month');
   const [isRecurring, setIsRecurring] = useState(false);
 
+
+
+
   useEffect(() => {
+
     const fetchEvents = async () => {
-      if (!user) return;
+      if (!user) {
+        return;
+      }
 
       try {
         const response = await axios.get('http://localhost:5000/api/events', {
-          params: { userId: user._id }
+          params: teamId ? { teamId } : { userId: user._id },
         });
+
         const formattedEvents = response.data.map(event => ({
           ...event,
           start: new Date(event.start),
-          end: new Date(event.end)
+          end: new Date(event.end),
         }));
+
         setEvents(formattedEvents);
       } catch (error) {
         console.error('Error fetching events:', error);
@@ -105,7 +128,21 @@ const MyCalendar = ({ user }) => {
     };
 
     fetchEvents();
-  }, [user]);
+  }, [user, teamId]);
+
+  const dayPropGetter = (date) => {
+    const isToday = moment(date).isSame(new Date(), 'day');
+    if (isToday) {
+      const lightColor = lightColors[teamColor] || '#f2f2f2';
+      return {
+        style: {
+          backgroundColor: lightColor,
+        },
+      };
+    }
+    return {};
+  };
+
 
   const handleSelectSlot = (slotInfo) => {
     setSelectedSlot(slotInfo);
@@ -127,11 +164,14 @@ const MyCalendar = ({ user }) => {
     };
 
     try {
-      console.log('저장 요청 데이터:', newEvent);
       const response = await axios.post('http://localhost:5000/api/events', newEvent);
-      console.log('서버 응답:', response.data);
 
-      setEvents([...events, { ...newEvent, _id: response.data._id, start: selectedSlot.start, end: selectedSlot.end }]);
+      setEvents([...events, {
+        ...newEvent,
+        _id: response.data._id,
+        start: selectedSlot.start,
+        end: selectedSlot.end
+      }]);
       setNewEventTitle('');
       setIsRecurring(false);
       setModalIsOpen(false);
@@ -162,13 +202,8 @@ const MyCalendar = ({ user }) => {
     setDeleteModalIsOpen(false);
   }
 
-  /* 월간 뷰에서 제외할 일정 */
-  const filteredEvents = events.filter(event => {
-    if (view === 'month') {
-      return !event.isRecurring;
-    }
-    return true;
-  });
+  const filteredEvents = events.filter(event => view === 'month' ? !event.isRecurring : true);
+
 
   return (
     <div>
@@ -183,15 +218,19 @@ const MyCalendar = ({ user }) => {
         components={{
           event: CustomEvent,
           toolbar: CustomToolbar,
+          header: CustomHeader,
         }}
 
         dayLayoutAlgorithm='overlap'
-        style={{ height: '66vh', margin: '50px' }}
-        min={new Date(2024, 10, 4, 9, 0)}
-        max={new Date(2024, 10, 4, 19, 0)}
+        style={{ height: 'calc(100vh - 190px)', margin: '50px' }}
+        min={new Date(2024, 10, 4, 7, 0)}
+        max={new Date(2024, 10, 4, 23, 0)}
         onSelectSlot={handleSelectSlot}
         onSelectEvent={handleSelectEvent}
-        onView={(newView) => setView(newView)}
+        onView={(newView) => {
+          setView(newView)
+        }}
+        dayPropGetter={dayPropGetter}
       />
 
       <Modal
