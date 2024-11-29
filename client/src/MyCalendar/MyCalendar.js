@@ -50,17 +50,13 @@ const CustomToolbar = (toolbar) => {
   );
 };
 
+
 const CustomEvent = ({ event }) => {
   return (
-    <div style={{
-      backgroundColor: event.isRecurring ? '#FFD700' : '#9ACD4C', /*정기 일정은 노란색으로*/
-      display: 'flex',
-      justifyContent: 'center',
-      alignItems: 'center',
-      height: '100%',
-      borderRadius: '4px',
-      textAlign: 'center',
-    }}>
+    <div
+      className="custom-event"
+      style={{ backgroundColor: event.backgroundColor || "#ababab" }}
+    >
       {event.title}
     </div>
   );
@@ -76,11 +72,54 @@ const CustomHeader = ({ date }) => {
 };
 
 const formats = {
-  dayFormat: 'dddd', // 요일 형식
+  dayFormat: 'dddd',
   timeGutterFormat: (date) => moment(date).format('A hh:mm'),
   eventTimeRangeFormat: () => {
   },
 };
+
+const generateRandomVividHexColor = () => {
+  const hue = Math.floor(Math.random() * 360); // 0 ~ 360
+  const saturation = Math.floor(Math.random() * 20) + 80; // 80% ~ 100% 채도
+  const lightness = Math.floor(Math.random() * 20) + 40; // 40% ~ 60% 명도
+
+  const hslToRgb = (h, s, l) => {
+    s /= 100;
+    l /= 100;
+
+    const c = (1 - Math.abs(2 * l - 1)) * s;
+    const x = c * (1 - Math.abs((h / 60) % 2 - 1));
+    const m = l - c / 2;
+
+    let r = 0, g = 0, b = 0;
+
+    if (h < 60) {
+      r = c; g = x; b = 0;
+    } else if (h < 120) {
+      r = x; g = c; b = 0;
+    } else if (h < 180) {
+      r = 0; g = c; b = x;
+    } else if (h < 240) {
+      r = 0; g = x; b = c;
+    } else if (h < 300) {
+      r = x; g = 0; b = c;
+    } else {
+      r = c; g = 0; b = x;
+    }
+
+    r = Math.round((r + m) * 255);
+    g = Math.round((g + m) * 255);
+    b = Math.round((b + m) * 255);
+
+    return { r, g, b };
+  };
+
+  const { r, g, b } = hslToRgb(hue, saturation, lightness);
+  const toHex = (value) => value.toString(16).padStart(2, '0').toUpperCase();
+  return `#${toHex(r)}${toHex(g)}${toHex(b)}`;
+};
+
+
 
 const lightColors = {
   '#63A0CC': '#C0D9EA',
@@ -101,6 +140,43 @@ const MyCalendar = ({ user, teamId, teamColor }) => {
   const [isRecurring, setIsRecurring] = useState(false);
 
 
+  const expandRecurringEvents = (events, rangeInWeeks = 16) => {
+    const oneWeek = 7 * 24 * 60 * 60 * 1000;
+    const today = new Date();
+    const startRange = new Date(today.getTime() - (rangeInWeeks / 2) * oneWeek);
+    const endRange = new Date(today.getTime() + (rangeInWeeks / 2) * oneWeek);
+
+    return events.flatMap(event => {
+      if (event.isRecurring) {
+        const occurrences = [];
+        let currentStart = new Date(event.start);
+        let currentEnd = new Date(event.end);
+
+        while (currentStart <= endRange) {
+          if (currentStart >= startRange) {
+            occurrences.push({
+              ...event,
+              start: new Date(currentStart),
+              end: new Date(currentEnd),
+            });
+          }
+          currentStart = new Date(currentStart.getTime() + oneWeek);
+          currentEnd = new Date(currentEnd.getTime() + oneWeek);
+        }
+
+        return occurrences;
+      }
+
+      return {
+        ...event,
+        start: new Date(event.start),
+        end: new Date(event.end),
+      };
+    });
+  };
+
+
+
 
 
   useEffect(() => {
@@ -110,18 +186,16 @@ const MyCalendar = ({ user, teamId, teamColor }) => {
         return;
       }
 
+
       try {
         const response = await axios.get('http://localhost:5000/api/events', {
           params: teamId ? { teamId } : { userId: user._id },
         });
 
-        const formattedEvents = response.data.map(event => ({
-          ...event,
-          start: new Date(event.start),
-          end: new Date(event.end),
-        }));
+        const expandedEvents = expandRecurringEvents(response.data);
 
-        setEvents(formattedEvents);
+
+        setEvents(expandedEvents);
       } catch (error) {
         console.error('Error fetching events:', error);
       }
@@ -155,12 +229,22 @@ const MyCalendar = ({ user, teamId, teamColor }) => {
       return;
     }
 
+
+    const backgroundColor = teamId
+      ? teamColor // 팀 일정은 항상 팀 색상
+      : isRecurring
+        ? generateRandomVividHexColor() // 개인 정기적 일정은 무작위 색상
+        : "#ababab"; // 개인 비정기적 일정은 회색
+
+
     const newEvent = {
       title: newEventTitle,
       start: selectedSlot.start.toISOString(),
       end: selectedSlot.end.toISOString(),
       isRecurring,
       userId: user._id,
+      teamId: teamId || null,
+      backgroundColor,
     };
 
     try {
@@ -172,6 +256,7 @@ const MyCalendar = ({ user, teamId, teamColor }) => {
         start: selectedSlot.start,
         end: selectedSlot.end
       }]);
+
       setNewEventTitle('');
       setIsRecurring(false);
       setModalIsOpen(false);
@@ -182,6 +267,10 @@ const MyCalendar = ({ user, teamId, teamColor }) => {
   };
 
   const handleSelectEvent = (event) => {
+    if (teamId) {
+      return;
+    }
+
     setSelectedEvent(event);
     setDeleteModalIsOpen(true);
   };
@@ -202,7 +291,52 @@ const MyCalendar = ({ user, teamId, teamColor }) => {
     setDeleteModalIsOpen(false);
   }
 
-  const filteredEvents = events.filter(event => view === 'month' ? !event.isRecurring : true);
+
+
+
+  const filteredEvents = useMemo(() => {
+    const uniqueEvents = new Set();
+
+    return events.filter((event) => {
+      const eventKey = `${event.teamId || ''}-${event.start}-${event.end}-${event.title}`;
+
+      if (uniqueEvents.has(eventKey)) {
+        return false;
+      }
+      uniqueEvents.add(eventKey);
+
+      if (event.teamId) {
+        if (view === 'month') {
+          return teamId === null || teamId === event.teamId;
+        }
+        if (view === 'week') {
+          return true;
+        }
+      }
+
+      if (!event.teamId && event.isRecurring && event.userId === user._id) {
+        return view === 'week';
+      }
+
+      if (!event.teamId && !event.isRecurring && event.userId === user._id) {
+        if (view === 'month') {
+          return true;
+        }
+        if (view === 'week') {
+          return true;
+        }
+      }
+
+      if (!event.teamId && event.userId !== user._id) {
+        return view === 'week' && teamId !== null;
+      }
+
+      return false;
+    });
+  }, [events, view, teamId, user._id]);
+
+
+
 
 
   return (
@@ -216,7 +350,7 @@ const MyCalendar = ({ user, teamId, teamColor }) => {
         messages={messages}
         formats={formats}
         components={{
-          event: CustomEvent,
+          event: (props) => <CustomEvent {...props} teamColor={teamColor} />,
           toolbar: CustomToolbar,
           header: CustomHeader,
         }}
@@ -231,6 +365,21 @@ const MyCalendar = ({ user, teamId, teamColor }) => {
           setView(newView)
         }}
         dayPropGetter={dayPropGetter}
+        eventPropGetter={(event) => {
+          if (view === 'month') {
+            return {
+              style: {
+                backgroundColor: event.backgroundColor || "#ababab", // 팀 색상 동기화
+                color: "#fff",
+                borderRadius: "4px",
+                border: "none",
+                borderTopRightRadius: "0",
+                borderBottomRightRadius: "0",
+              },
+            };
+          }
+          return {};
+        }}
       />
 
       <Modal

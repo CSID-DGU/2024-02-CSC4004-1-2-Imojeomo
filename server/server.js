@@ -70,6 +70,8 @@ const eventSchema = new mongoose.Schema({
     end: Date,
     isRecurring: { type: Boolean, default: false },
     userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+    teamId: { type: mongoose.Schema.Types.ObjectId, ref: 'Team', default: null },
+    backgroundColor: { type: String, default: '#ababab' },
 });
 const Event = mongoose.model('Event', eventSchema);
 
@@ -79,6 +81,10 @@ app.get('/api/events', async (req, res) => {
 
     try {
         let events;
+
+
+
+
 
         if (teamId) {
             const team = await Team.findById(teamId).populate('members');
@@ -102,16 +108,56 @@ app.get('/api/events', async (req, res) => {
 
 /* 스케줄 입력하기 */
 app.post('/api/events', async (req, res) => {
-    const { title, start, end, isRecurring, userId } = req.body;
+    const { title, start, end, isRecurring, userId, teamId, backgroundColor } = req.body;
 
     if (!title || !start || !end || !userId) {
         return res.status(400).json({ message: '필수 필드가 누락되었습니다.' });
     }
 
     try {
-        const newEvent = new Event({ title, start, end, isRecurring, userId });
-        await newEvent.save();
-        res.status(201).json(newEvent);
+        if (teamId) {
+            // 팀 일정 로직
+            const team = await Team.findById(teamId).populate('members');
+            if (!team) {
+                return res.status(404).json({ message: '팀을 찾을 수 없습니다.' });
+            }
+
+            // 각 팀 멤버에 대해 일정 생성
+            const events = await Promise.all(
+                team.members.map(async (member) => {
+                    const newEvent = new Event({
+                        title,
+                        start,
+                        end,
+                        isRecurring,
+                        userId: member._id, // 멤버의 userId를 설정
+                        teamId,
+                        backgroundColor,
+                    });
+                    return newEvent.save();
+                })
+            );
+
+            return res.status(201).json({
+                message: '팀 일정이 저장되었습니다.',
+                events,
+            });
+        } else {
+            // 개인 일정 로직
+            const newEvent = new Event({
+                title,
+                start,
+                end,
+                isRecurring,
+                userId,
+                teamId: null, // 팀 ID가 없는 경우 null로 설정
+                backgroundColor,
+            });
+
+            await newEvent.save();
+            return res.status(201).json(newEvent);
+        }
+
     } catch (error) {
         res.status(500).json({ message: '일정 추가 오류' });
     }

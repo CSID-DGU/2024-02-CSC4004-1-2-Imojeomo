@@ -38,6 +38,7 @@ body {
     border: none;
     cursor: pointer;
     background: none;
+    font-weight: bold;
 }
 
 .leftButton,
@@ -55,17 +56,19 @@ body {
 
 .rbc-month-view .rbc-event,
 .rbc-time-view .rbc-event {
-    background-color: #9ACD4C;
+    background-color: #ababab;
     font-size: 12px;
     box-sizing: border-box;
     margin-right: 1px;
 }
+
 
 .rbc-month-view .rbc-event {
     min-width: 65%;
     max-width: 65%;
     border-top-right-radius: 0;
     border-bottom-right-radius: 0;
+    background-color: unset;
 }
 
 .rbc-time-view .rbc-event {
@@ -78,6 +81,7 @@ body {
 .rbc-day-slot .rbc-events-container {
     margin: 0;
 }
+
 
 .rbc-date-cell {
     text-align: left;
@@ -183,6 +187,8 @@ body {
     position: absolute;
     left: 0 !important;
     width: 100%;
+    border: none;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .rbc-time-view .rbc-event {
@@ -231,6 +237,7 @@ body {
     top: -5px;
 }
 
+
 .rbc-month-view .rbc-today {
     border: solid 2px white;
 }
@@ -240,7 +247,7 @@ body {
 }
 
 .rbc-month-view .custom-header .date {
-    display: block;
+    display: none;
 }
 
 .custom-header .day {
@@ -266,4 +273,23 @@ body {
 
 .rbc-time-content .rbc-time-slot {
     border: none;
+}
+
+
+.custom-event {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+    border-radius: 4px;
+    text-align: center;
+    font-weight: bold;
+}
+
+.custom-event.default {
+    background-color: #ababab;
+}
+
+.custom-event.recurring {
+    background-color: var(--event-bg-color, #FFD700);
 }
