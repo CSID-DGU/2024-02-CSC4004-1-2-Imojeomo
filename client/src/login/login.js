@@ -32,7 +32,6 @@ function Login({ setUser }) {
         e.preventDefault();
 
         if (!isSignUpMode) {
-            // 로그인 처리
             try {
                 const response = await axios.post('http://localhost:5000/api/login', formData);
                 console.log('로그인 성공: ', response.data);
@@ -46,12 +45,11 @@ function Login({ setUser }) {
                 alert('로그인 실패: ' + (error.response?.data.message || error.message));
             }
         } else {
-            // 회원가입 처리
             try {
                 const response = await axios.post('http://localhost:5000/api/register', formData);
                 console.log(response.data);
                 alert('회원가입 성공!');
-                setIsSignUpMode(false);  // 로그인 모드로 돌아가기
+                setIsSignUpMode(false);
             } catch (error) {
                 console.error('회원가입 실패:', error.response?.data.message || error.message);
             }

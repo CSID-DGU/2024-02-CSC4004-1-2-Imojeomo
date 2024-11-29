@@ -1,8 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import './App.css';
 import Login from './login/login';
-import Main from './main/main';
-import AddTeam from './add-team/add-team'; // AddTeam 컴포넌트 추가
 import Profile from './profile/profile';
 import Team from './team/team';
 import Place from './place/place';
@@ -29,9 +27,7 @@ function App() {
   return (
     <Router>
       <Routes>
-        <Route path="/login" element={<Login setUser={setUser} />} />
-        <Route path="/" element={<Main />} />
-        <Route path="/add-team" element={<AddTeam />} />
+        <Route path="/" element={<Login setUser={setUser} />} />
         <Route path="/profile" element={<Profile />} />
         <Route path="/team" element={<Team user={user} logout={logout} />} />
         <Route path="/place" element={<Place />} />

@@ -33,7 +33,7 @@ function Team({ user, logout }) {
 
     const handleLogout = () => {
         logout();
-        navigate('/login');
+        navigate('/team');
     };
 
     const handleCreateTeam = async () => {
@@ -137,7 +137,7 @@ function Team({ user, logout }) {
         <div className="team-container">
 
             <aside className="team-header">
-                <Link to="/" className="logo-link">
+                <Link to="/team" className="logo-link">
                     <img src="/imo_logo_small.png" alt="IMO 로고" className="logo" />
                 </Link>
                 <div className="profile-section">
