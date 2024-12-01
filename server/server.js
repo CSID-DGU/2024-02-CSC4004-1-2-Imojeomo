@@ -116,13 +116,11 @@ app.post('/api/events', async (req, res) => {
 
     try {
         if (teamId) {
-            // 팀 일정 로직
             const team = await Team.findById(teamId).populate('members');
             if (!team) {
                 return res.status(404).json({ message: '팀을 찾을 수 없습니다.' });
             }
 
-            // 각 팀 멤버에 대해 일정 생성
             const events = await Promise.all(
                 team.members.map(async (member) => {
                     const newEvent = new Event({
@@ -130,7 +128,7 @@ app.post('/api/events', async (req, res) => {
                         start,
                         end,
                         isRecurring,
-                        userId: member._id, // 멤버의 userId를 설정
+                        userId: member._id,
                         teamId,
                         backgroundColor,
                     });
@@ -143,14 +141,13 @@ app.post('/api/events', async (req, res) => {
                 events,
             });
         } else {
-            // 개인 일정 로직
             const newEvent = new Event({
                 title,
                 start,
                 end,
                 isRecurring,
                 userId,
-                teamId: null, // 팀 ID가 없는 경우 null로 설정
+                teamId: null,
                 backgroundColor,
             });
 
