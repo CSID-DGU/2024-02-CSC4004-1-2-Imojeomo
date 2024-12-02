@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import { Calendar, momentLocalizer } from 'react-big-calendar';
+import { useNavigate } from 'react-router-dom';
 import moment from 'moment';
 import axios from 'axios';
 import Modal from 'react-modal';
@@ -51,16 +52,6 @@ const CustomToolbar = (toolbar) => {
 };
 
 
-const CustomEvent = ({ event }) => {
-  return (
-    <div
-      className="custom-event"
-      style={{ backgroundColor: event.backgroundColor || "#ababab" }}
-    >
-      {event.title}
-    </div>
-  );
-};
 
 const CustomHeader = ({ date }) => {
   return (
@@ -139,7 +130,22 @@ const MyCalendar = ({ user, teamId, teamColor }) => {
   const [view, setView] = useState('month');
   const [isRecurring, setIsRecurring] = useState(false);
 
+  const navigate = useNavigate();
 
+
+  const CustomEvent = ({ event }) => {
+    return (
+      <div
+        className="custom-event"
+        style={{ backgroundColor: event.backgroundColor || "#ababab" }}
+      >
+        <div className="event-title">{event.title}</div>
+        {view !== "month" && event.place && (
+          <div className="event-place">({event.place})</div>
+        )}
+      </div>
+    );
+  };
   const expandRecurringEvents = (events, rangeInWeeks = 16) => {
     const oneWeek = 7 * 24 * 60 * 60 * 1000;
     const today = new Date();
@@ -174,7 +180,6 @@ const MyCalendar = ({ user, teamId, teamColor }) => {
       };
     });
   };
-
 
 
 
@@ -268,9 +273,9 @@ const MyCalendar = ({ user, teamId, teamColor }) => {
 
   const handleSelectEvent = (event) => {
     if (teamId) {
+      navigate(`/place?eventId=${event._id}&teamId=${teamId}`);
       return;
     }
-
     setSelectedEvent(event);
     setDeleteModalIsOpen(true);
   };

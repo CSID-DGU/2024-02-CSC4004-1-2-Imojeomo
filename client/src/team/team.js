@@ -21,7 +21,34 @@ function Team({ user, logout }) {
     const [isJoinMode, setJoinMode] = useState(false);
     const [inviteCode, setInviteCode] = useState("");
 
+    const [filteredEvents, setFilteredEvents] = useState([]);
+
+
     const navigate = useNavigate();
+
+    useEffect(() => {
+        const fetchFilteredEvents = async () => {
+            if (!user) return;
+
+            try {
+                const response = await axios.get("http://localhost:5000/api/filtered-events", {
+                    params: {
+                        userId: user._id,
+                        view: selectedTeamId ? "team" : "personal", // view 상태 전달
+                        teamId: selectedTeamId || null,            // teamId 전달
+                    },
+                });
+                setFilteredEvents(response.data);
+            } catch (err) {
+                console.error("필터링된 일정 로드 실패:", err);
+                setError("일정을 가져오는 중 오류가 발생했습니다.");
+            }
+        };
+
+        fetchFilteredEvents();
+    }, [user, selectedTeamId]);
+
+
 
 
     const openModal = () => setModalOpen(true);
@@ -33,7 +60,7 @@ function Team({ user, logout }) {
 
     const handleLogout = () => {
         logout();
-        navigate('/team');
+        navigate('/');
     };
 
     const handleCreateTeam = async () => {
@@ -84,7 +111,7 @@ function Team({ user, logout }) {
 
     const baseColors = ["#D35940", "#9ACD4C", "#63A0CC"];
     const backgroundColors = {
-        "#D35940": "#EDBCB2",
+        "#D35940": "#FFE1E5",
         "#9ACD4C": "#EAF4DB",
         "#63A0CC": "#C0D9EA",
     };
@@ -116,6 +143,7 @@ function Team({ user, logout }) {
     };
 
 
+
     useEffect(() => {
         const fetchTeams = async () => {
             if (!user) return;
@@ -131,6 +159,7 @@ function Team({ user, logout }) {
         };
         fetchTeams();
     }, [user]);
+
 
 
     return (
@@ -187,16 +216,71 @@ function Team({ user, logout }) {
 
                         {activeTab === "공지사항" && (
                             <div className="board">
-                                <ul>
-                                    <li><span>24일 모임 시간 투표</span></li>
-                                    <li>Lorem ipsum</li>
-                                    <li>Lorem ipsum</li>
-                                    <li>Lorem ipsum</li>
-                                    <li>Lorem ipsum</li>
-                                    <li>Lorem ipsum</li>
-                                </ul>
+                                {error ? (
+                                    <p>{error}</p>
+                                ) : filteredEvents.length > 0 ? (
+                                    <ul>
+                                        {filteredEvents.flatMap(event => {
+                                            // isRecurring 처리
+                                            if (event.isRecurring) {
+                                                const recurrenceEvents = [];
+                                                const startDate = new Date(event.start);
+                                                for (let i = 0; i < 10; i++) {
+                                                    const recurringStart = new Date(startDate);
+                                                    recurringStart.setDate(startDate.getDate() + i * 7); // 7일 간격
+                                                    recurrenceEvents.push({
+                                                        ...event,
+                                                        start: recurringStart, // 날짜 업데이트
+                                                    });
+                                                }
+                                                return recurrenceEvents;
+                                            }
+                                            return [event]; // 반복되지 않는 일정 그대로 반환
+                                        }).map(event => {
+                                            // teamId에 따라 배경색 결정
+                                            const teamColor = event.teamId
+                                                ? (() => {
+                                                    const teamIndex = teams.findIndex(team => team._id === event.teamId);
+                                                    return teamIndex !== -1 ? getButtonColor(teamIndex) : "#cecece"; // 팀 색상 반환
+                                                })()
+                                                : "#cecece"; // teamId가 없으면 #cecece
+
+                                            return (
+                                                <li
+                                                    key={`${event._id}-${event.start}`} // 고유 키: ID와 날짜 결합
+                                                    style={{
+                                                        backgroundColor: teamColor,
+                                                        padding: "10px",
+                                                        borderRadius: "8px",
+                                                        marginBottom: "8px",
+                                                        listStyle: "none",
+                                                    }}
+                                                >
+                                                    {/* 일정 이름과 날짜 */}
+                                                    <strong>{event.title}</strong> :{" "}
+                                                    {new Date(event.start).toLocaleString("ko-KR", {
+                                                        month: "long",
+                                                        day: "numeric",
+                                                        hour: "numeric",
+                                                        minute: "numeric",
+                                                        hour12: true,
+                                                    })}
+                                                    {/* 장소가 존재하면 출력 */}
+                                                    {event.place && (
+                                                        <div style={{ marginTop: "4px", fontSize: "0.9em", color: "black" }}>
+                                                            장소: {event.place}
+                                                        </div>
+                                                    )}
+                                                </li>
+                                            );
+                                        })}
+                                    </ul>
+                                ) : (
+                                    <p>표시할 일정이 없습니다.</p>
+                                )}
                             </div>
                         )}
+
 
                         {activeTab === "참여자" && (
                             <div className="participants-list">
@@ -238,6 +322,7 @@ function Team({ user, logout }) {
                         >
                             참여자
                         </button>
+
                     </div>
 
                 </aside>

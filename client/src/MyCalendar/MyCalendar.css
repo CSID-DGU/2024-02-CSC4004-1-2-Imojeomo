@@ -278,12 +278,18 @@ body {
 
 .custom-event {
     display: flex;
+    flex-direction: column;
     justify-content: center;
     align-items: center;
     height: 100%;
     border-radius: 4px;
     text-align: center;
     font-weight: bold;
+}
+
+.custom-event .event-place {
+    font-size: 15px;
+    margin-top: 15px;
 }
 
 .custom-event.default {

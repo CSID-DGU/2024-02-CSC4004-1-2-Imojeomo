@@ -1,10 +1,10 @@
 function sample5_execDaumPostcode() {
     new daum.Postcode({
-        oncomplete: function(data) {
+        oncomplete: function (data) {
             var addr = data.address; // 최종 주소 변수
-                
+
             // 주소로 상세 정보를 검색
-            geocoder.addressSearch(data.address, function(results, status) {
+            geocoder.addressSearch(data.address, function (results, status) {
                 // 정상적으로 검색이 완료됐으면
                 if (status === daum.maps.services.Status.OK) {
                     var result = results[0]; // 첫 번째 결과의 값을 활용
@@ -47,7 +47,7 @@ function sample5_execDaumPostcode() {
 
                         // 모든 마커를 볼 수 있도록 지도 확대율 조정
                         map.setBounds(bounds);
-      
+
                     } else {
                         alert("최대 10개의 마커만 표시할 수 있습니다.");
                     }

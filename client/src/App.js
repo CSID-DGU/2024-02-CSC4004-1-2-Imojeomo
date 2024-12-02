@@ -13,6 +13,7 @@ function App() {
     return savedUser ? JSON.parse(savedUser) : null;
   });
 
+
   const logout = () => {
     setUser(null);
     localStorage.removeItem('user');

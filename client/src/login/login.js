@@ -1,7 +1,9 @@
-import React, { useState } from 'react';
+/* global kakao, daum */
+
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
-import './login.css'
+import './login.css';
 
 function Login({ setUser }) {
     const [isSignUpMode, setIsSignUpMode] = useState(false);
@@ -13,7 +15,35 @@ function Login({ setUser }) {
         residence: '',
     });
 
+    const [showModal, setShowModal] = useState(false);
+    const [map, setMap] = useState(null);
+    const [geocoder, setGeocoder] = useState(null);
     const navigate = useNavigate();
+
+    useEffect(() => {
+        if (showModal) {
+            setTimeout(() => {
+
+                const mapContainer = document.getElementById('map-modal');
+                if (!mapContainer) {
+                    console.error("지도 컨테이너를 찾을 수 없습니다.");
+                    return;
+                }
+
+                const mapOption = {
+                    center: new kakao.maps.LatLng(37.5665, 126.9780),
+                    level: 3,
+                };
+
+                const kakaoMap = new kakao.maps.Map(mapContainer, mapOption);
+                const kakaoGeocoder = new kakao.maps.services.Geocoder();
+
+                setMap(kakaoMap);
+                setGeocoder(kakaoGeocoder);
+            }, 100);
+        }
+    }, [showModal]);
+
 
     const handleSignUpClick = () => {
         setIsSignUpMode(true);
@@ -26,6 +56,18 @@ function Login({ setUser }) {
     const handleChange = (e) => {
         const { name, value } = e.target;
         setFormData({ ...formData, [name]: value });
+    };
+
+    const handleAddressSearch = () => {
+        new daum.Postcode({
+            oncomplete: (data) => {
+                // 선택된 주소를 residence에 저장
+                setFormData((prevFormData) => ({
+                    ...prevFormData,
+                    residence: data.address,
+                }));
+            },
+        }).open();
     };
 
     const handleSubmit = async (e) => {
@@ -135,10 +177,11 @@ function Login({ setUser }) {
                         <div className="input-field">
                             <input
                                 type="text"
-                                placeholder="거주지"
+                                placeholder="거주지 (클릭하여 검색)"
                                 name="residence"
                                 value={formData.residence}
-                                onChange={handleChange}
+                                onClick={handleAddressSearch}
+                                readOnly
                                 required
                             />
                         </div>
