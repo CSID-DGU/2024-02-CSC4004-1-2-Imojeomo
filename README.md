@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Getting Started with Create React App
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
@@ -68,3 +69,9 @@ This section has moved here: [https://facebook.github.io/create-react-app/docs/d
 ### `npm run build` fails to minify
 
 This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+=======
+# 2024-02-CSC4004-1-2-Imojeomo
+
+팀장 : 김주형
+팀원 : 나기현, 콩고르줄오치르밧, 정유진, 장준서
+>>>>>>> 63a49a5f016348a29f1fc17472582e453ff678a5
