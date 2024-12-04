@@ -1,0 +1,14 @@
+{
+  "files": {
+    "main.css": "/2024-02-CSC4004-1-2-Imojeomo/static/css/main.6e0e0bd2.css",
+    "main.js": "/2024-02-CSC4004-1-2-Imojeomo/static/js/main.dc7a8222.js",
+    "static/media/NanumSquareRoundR.ttf": "/2024-02-CSC4004-1-2-Imojeomo/static/media/NanumSquareRoundR.f062cb52be3e9829834c.ttf",
+    "index.html": "/2024-02-CSC4004-1-2-Imojeomo/index.html",
+    "main.6e0e0bd2.css.map": "/2024-02-CSC4004-1-2-Imojeomo/static/css/main.6e0e0bd2.css.map",
+    "main.dc7a8222.js.map": "/2024-02-CSC4004-1-2-Imojeomo/static/js/main.dc7a8222.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.6e0e0bd2.css",
+    "static/js/main.dc7a8222.js"
+  ]
+}
