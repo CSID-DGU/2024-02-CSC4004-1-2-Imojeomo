@@ -4,6 +4,11 @@ import { Link } from 'react-router-dom';
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import MyCalendar from '../MyCalendar/MyCalendar';
+import { io } from 'socket.io-client';
+
+const socket = io('http://localhost:5000');
+
+
 
 function Team({ user, logout }) {
     const [isModalOpen, setModalOpen] = useState(false);
@@ -23,8 +28,108 @@ function Team({ user, logout }) {
 
     const [filteredEvents, setFilteredEvents] = useState([]);
 
+    const [chatMessages, setChatMessages] = useState([]);
+    const [newMessage, setNewMessage] = useState("");
 
     const navigate = useNavigate();
+
+    useEffect(() => {
+        socket.on('connect', () => {
+            console.log("WebSocket 연결됨:", socket.id);
+        });
+
+        socket.on('disconnect', () => {
+            console.log("WebSocket 연결 끊김.");
+        });
+
+        return () => {
+            socket.off('connect');
+            socket.off('disconnect');
+        };
+    }, []);
+
+
+    useEffect(() => {
+        const fetchMessages = async () => {
+            try {
+                if (!selectedTeamId) {
+                    console.warn('선택된 팀 ID가 없습니다.');
+                    setChatMessages([]);
+                    return;
+                }
+
+                console.log('요청 경로:', `http://localhost:5000/api/chat/${selectedTeamId}`);
+
+                const response = await axios.get(`http://localhost:5000/api/chat/${selectedTeamId}`);
+                const messages = response.data;
+
+                console.log('서버로부터 받은 메시지:', messages);
+                setChatMessages(messages);
+            } catch (error) {
+                console.error('채팅 메시지 로드 실패:', error);
+            }
+        };
+
+        fetchMessages();
+    }, [selectedTeamId]);
+
+
+
+    useEffect(() => {
+        const handleNewMessage = (message) => {
+            console.log("새 메시지 수신:", message);
+
+            // 중복 메시지 추가 방지
+            setChatMessages((prevMessages) => {
+                const isDuplicate = prevMessages.some((msg) => msg._id === message._id);
+                if (isDuplicate) return prevMessages;
+                return [...prevMessages, message];
+            });
+        };
+
+        socket.on('newMessage', handleNewMessage);
+
+        return () => {
+            socket.off('newMessage', handleNewMessage);
+        };
+    }, []);
+
+
+
+    const sendMessage = () => {
+        if (newMessage.trim()) {
+            const message = {
+                _id: Date.now(), // 임시 ID
+                teamId: selectedTeamId,
+                userId: user._id,
+                userName: user.name, // 본인의 이름 (필요 시 사용)
+                message: newMessage,
+                timestamp: new Date(), // 현재 시간
+                isTemporary: true, // 임시 메시지 플래그
+            };
+
+            // 상태를 즉시 업데이트
+            setChatMessages((prevMessages) => [...prevMessages, message]);
+
+            // 서버로 메시지 전송
+            socket.emit('chatMessage', message);
+
+            // 입력 필드 초기화
+            setNewMessage("");
+        }
+    };
+
+
+
+
+
+
+
+
+
+
+
+
 
     useEffect(() => {
         const fetchFilteredEvents = async () => {
@@ -211,85 +316,100 @@ function Team({ user, logout }) {
 
                 <aside className="notifications">
                     <div className="tab-content">
-
-                        <h2 className="board-title">{selectedTeamName}</h2>
+                        {/* 제목 동적 변경 */}
+                        <h2 className="board-title">
+                            {selectedTeamId ? "채팅" : "공지사항"}
+                        </h2>
 
                         {activeTab === "공지사항" && (
                             <div className="board">
-                                {error ? (
-                                    <p>{error}</p>
-                                ) : filteredEvents.length > 0 ? (
-                                    <ul>
-                                        {filteredEvents.flatMap(event => {
-                                            // isRecurring 처리
-                                            if (event.isRecurring) {
-                                                const recurrenceEvents = [];
-                                                const startDate = new Date(event.start);
-                                                for (let i = 0; i < 10; i++) {
-                                                    const recurringStart = new Date(startDate);
-                                                    recurringStart.setDate(startDate.getDate() + i * 7); // 7일 간격
-                                                    recurrenceEvents.push({
-                                                        ...event,
-                                                        start: recurringStart, // 날짜 업데이트
-                                                    });
-                                                }
-                                                return recurrenceEvents;
-                                            }
-                                            return [event]; // 반복되지 않는 일정 그대로 반환
-                                        }).map(event => {
-                                            // teamId에 따라 배경색 결정
-                                            const teamColor = event.teamId
-                                                ? (() => {
-                                                    const teamIndex = teams.findIndex(team => team._id === event.teamId);
-                                                    return teamIndex !== -1 ? getButtonColor(teamIndex) : "#cecece"; // 팀 색상 반환
-                                                })()
-                                                : "#cecece"; // teamId가 없으면 #cecece
-
-                                            return (
-                                                <li
-                                                    key={`${event._id}-${event.start}`} // 고유 키: ID와 날짜 결합
-                                                    style={{
-                                                        backgroundColor: teamColor,
-                                                        padding: "10px",
-                                                        borderRadius: "8px",
-                                                        marginBottom: "8px",
-                                                        listStyle: "none",
-                                                    }}
-                                                >
-                                                    {/* 일정 이름과 날짜 */}
-                                                    <strong>{event.title}</strong> :{" "}
-                                                    {new Date(event.start).toLocaleString("ko-KR", {
-                                                        month: "long",
-                                                        day: "numeric",
-                                                        hour: "numeric",
-                                                        minute: "numeric",
-                                                        hour12: true,
-                                                    })}
-                                                    {/* 장소가 존재하면 출력 */}
-                                                    {event.place && (
-                                                        <div style={{ marginTop: "4px", fontSize: "0.9em", color: "black" }}>
-                                                            장소: {event.place}
-                                                        </div>
-                                                    )}
-                                                </li>
-                                            );
-                                        })}
-                                    </ul>
+                                {selectedTeamId ? (
+                                    // 채팅 UI 유지
+                                    <>
+                                        {/* ... 채팅 관련 코드 */}
+                                    </>
                                 ) : (
-                                    <p>표시할 일정이 없습니다.</p>
+                                    // 기존 공지사항 UI 수정
+                                    error ? (
+                                        <p>{error}</p>
+                                    ) : filteredEvents.length > 0 ? (
+                                        <ul>
+                                            {filteredEvents
+                                                .flatMap((event) => {
+                                                    if (event.isRecurring) {
+                                                        const recurrenceEvents = [];
+                                                        const startDate = new Date(event.start);
+                                                        for (let i = 0; i < 10; i++) {
+                                                            const recurringStart = new Date(startDate);
+                                                            recurringStart.setDate(startDate.getDate() + i * 7);
+                                                            recurrenceEvents.push({
+                                                                ...event,
+                                                                start: recurringStart,
+                                                            });
+                                                        }
+                                                        return recurrenceEvents;
+                                                    }
+                                                    return [event];
+                                                })
+                                                .sort((a, b) => new Date(a.start) - new Date(b.start)) // 가까운 순으로 정렬
+                                                .map((event) => {
+                                                    const teamColor = event.teamId
+                                                        ? (() => {
+                                                            const teamIndex = teams.findIndex(
+                                                                (team) => team._id === event.teamId
+                                                            );
+                                                            return teamIndex !== -1 ? getButtonColor(teamIndex) : "#cecece";
+                                                        })()
+                                                        : "#cecece";
+
+                                                    return (
+                                                        <li
+                                                            key={`${event._id}-${event.start}`}
+                                                            style={{
+                                                                backgroundColor: teamColor,
+                                                                padding: "10px",
+                                                                borderRadius: "8px",
+                                                                marginBottom: "8px",
+                                                                listStyle: "none",
+                                                            }}
+                                                        >
+                                                            <strong>{event.title}</strong> :{" "}
+                                                            {new Date(event.start).toLocaleString("ko-KR", {
+                                                                month: "long",
+                                                                day: "numeric",
+                                                                hour: "numeric",
+                                                                minute: "numeric",
+                                                                hour12: true,
+                                                            })}
+                                                            {event.place && (
+                                                                <div
+                                                                    style={{
+                                                                        marginTop: "4px",
+                                                                        fontSize: "0.9em",
+                                                                        color: "black",
+                                                                    }}
+                                                                >
+                                                                    장소: {event.place}
+                                                                </div>
+                                                            )}
+                                                        </li>
+                                                    );
+                                                })}
+                                        </ul>
+                                    ) : (
+                                        <p>표시할 일정이 없습니다.</p>
+                                    )
                                 )}
                             </div>
-                        )}
 
+                        )}
 
                         {activeTab === "참여자" && (
                             <div className="participants-list">
                                 <h3>참여자 명단</h3>
                                 <ul>
                                     {teamMembers.length > 0 ? (
-                                        teamMembers.map(member => (
-                                            <li key={member._id}>{member.name}</li>
-                                        ))
+                                        teamMembers.map((member) => <li key={member._id}>{member.name}</li>)
                                     ) : (
                                         <li>참여자가 없습니다.</li>
                                     )}
@@ -313,19 +433,18 @@ function Team({ user, logout }) {
                             onClick={() => setActiveTab("공지사항")}
                             style={{ backgroundColor: selectedTeamColor }}
                         >
-                            공지사항
+                            {selectedTeamId ? "채팅" : "공지사항"}
                         </button>
                         <button
                             className={activeTab === "참여자" ? "active-tab" : ""}
                             onClick={() => setActiveTab("참여자")}
                             style={{ backgroundColor: selectedTeamColor }}
                         >
-                            참여자
+                            참여인원
                         </button>
-
                     </div>
-
                 </aside>
+
             </main>
 
             {/* Modal */}

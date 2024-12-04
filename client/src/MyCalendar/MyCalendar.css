@@ -299,3 +299,11 @@ body {
 .custom-event.recurring {
     background-color: var(--event-bg-color, #FFD700);
 }
+
+/* 공휴일 .rbc-button-link 색상 변경 */
+.rbc-date-cell.holiday .rbc-button-link {
+    color: #FF0000 !important;
+    /* 빨간색 텍스트 */
+    font-weight: bold;
+    /* 굵은 텍스트 */
+}

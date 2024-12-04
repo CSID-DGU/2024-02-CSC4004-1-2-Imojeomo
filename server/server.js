@@ -1,15 +1,28 @@
+const http = require('http');
 const express = require('express');
+const { Server } = require('socket.io');
 const mongoose = require('mongoose');
 const cors = require('cors');
 const bodyParser = require('body-parser');
 const bcrypt = require('bcrypt');
+
 require('dotenv').config();
 
 
 const app = express();
 const PORT = 5000;
+const server = http.createServer(app);
+const io = new Server(server, {
+    cors: {
+        origin: "http://localhost:3000", // 클라이언트 URL
+        methods: ["GET", "POST"],
+    },
+});
 
-app.use(cors());
+app.use(cors({
+    origin: ['http://localhost:3000'],
+    methods: ['GET', 'POST', 'DELETE', 'PATCH'],
+}));
 app.use(express.json())
 app.use(bodyParser.json());
 
@@ -17,6 +30,70 @@ mongoose.connect('mongodb://localhost:27017/calendar', {
     useNewUrlParser: true,
     useUnifiedTopology: true,
 }).then(() => console.log('MongoDB connected')).catch(err => console.error(err));
+
+
+
+
+// 채팅 메시지 스키마
+const chatSchema = new mongoose.Schema({
+    teamId: { type: mongoose.Schema.Types.ObjectId, ref: 'Team', required: true },
+    userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+    message: { type: String, required: true },
+    timestamp: { type: Date, default: Date.now },
+});
+
+const ChatMessage = mongoose.model('ChatMessage', chatSchema);
+
+
+// WebSocket 이벤트 핸들러
+io.on('connection', (socket) => {
+    console.log('WebSocket 연결됨:', socket.id);
+
+    socket.on('joinTeam', (teamId) => {
+        socket.join(teamId);
+        console.log(`사용자 ${socket.id}가 팀 ${teamId}에 참여`);
+    });
+
+    socket.on('chatMessage', async (message) => {
+        try {
+            const chatMessage = new ChatMessage({
+                teamId: new mongoose.Types.ObjectId(message.teamId),
+                userId: new mongoose.Types.ObjectId(message.userId),
+                message: message.message,
+            });
+
+            const savedMessage = await chatMessage.save();
+
+            // 저장된 메시지와 사용자 이름 포함하여 브로드캐스트
+            const populatedMessage = await savedMessage.populate('userId', 'name');
+
+            const broadcastMessage = {
+                _id: populatedMessage._id,
+                teamId: populatedMessage.teamId,
+                userId: populatedMessage.userId._id,
+                userName: populatedMessage.userId.name,
+                message: populatedMessage.message,
+                timestamp: populatedMessage.timestamp,
+            };
+
+            // 같은 팀에 연결된 모든 클라이언트로 브로드캐스트
+            io.to(message.teamId).emit('newMessage', broadcastMessage);
+        } catch (error) {
+            console.error("메시지 저장 및 브로드캐스트 실패:", error);
+        }
+    });
+
+
+
+
+    socket.on('disconnect', () => {
+        console.log('WebSocket 연결 종료:', socket.id);
+    });
+});
+
+
+
+
 
 /* 유저 스키마 */
 const userSchema = new mongoose.Schema({
@@ -343,6 +420,45 @@ app.get('/api/teams/:teamId/members', async (req, res) => {
     }
 });
 
+/* 채팅 가졍괴 */
+app.get('/api/chat/:teamId', async (req, res) => {
+    const { teamId } = req.params;
+
+    try {
+        console.log('요청된 팀 ID:', teamId); // 디버깅
+
+        const objectIdTeamId = new mongoose.Types.ObjectId(teamId);
+
+        const messages = await ChatMessage.find({ teamId: objectIdTeamId })
+            .populate('userId', 'name')
+            .sort({ timestamp: 1 });
+
+        console.log('DB에서 가져온 메시지:', messages);
+
+        res.json(messages.map((msg) => ({
+            _id: msg._id,
+            teamId: msg.teamId,
+            userName: msg.userId?.name || "Unknown",
+            userId: msg.userId?._id || null,
+            message: msg.message,
+            timestamp: msg.timestamp,
+        })));
+    } catch (error) {
+        console.error('채팅 메시지 로드 실패:', error);
+        res.status(500).json({ message: '채팅 메시지 로드 실패' });
+    }
+});
+
+
+
+
+
+
+
+
+
+
+
 
 /* 초대 */
 const crypto = require('crypto');
@@ -394,6 +510,6 @@ app.post('/api/teams/join', async (req, res) => {
 
 
 /* 서버 시작 */
-app.listen(PORT, () => {
+server.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
 })

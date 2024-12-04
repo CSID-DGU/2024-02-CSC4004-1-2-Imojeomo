@@ -4,7 +4,6 @@ import Login from './login/login';
 import Profile from './profile/profile';
 import Team from './team/team';
 import Place from './place/place';
-import Signup from './signup/signup';
 import { BrowserRouter as Router, Route, Routes, Link } from 'react-router-dom';
 
 function App() {
@@ -26,13 +25,30 @@ function App() {
   }, [user]);
 
   return (
+
     <Router>
       <Routes>
+
         <Route path="/" element={<Login setUser={setUser} />} />
-        <Route path="/profile" element={<Profile />} />
-        <Route path="/team" element={<Team user={user} logout={logout} />} />
-        <Route path="/place" element={<Place />} />
-        <Route path="/signup" element={<Signup />} />
+
+        <Route
+          path="/profile" element={
+            <Profile />
+          }
+        />
+
+        <Route
+          path="/team" element={
+            <Team user={user} logout={logout} />
+          }
+        />
+
+        <Route
+          path="/place" element={
+            <Place />
+          }
+        />
+
       </Routes>
     </Router>
   );

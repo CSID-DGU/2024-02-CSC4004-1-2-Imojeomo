@@ -6,6 +6,7 @@ import { useNavigate } from 'react-router-dom';
 import './login.css';
 
 function Login({ setUser }) {
+
     const [isSignUpMode, setIsSignUpMode] = useState(false);
     const [formData, setFormData] = useState({
         name: '',
@@ -78,7 +79,8 @@ function Login({ setUser }) {
                 const response = await axios.post('http://localhost:5000/api/login', formData);
                 console.log('로그인 성공: ', response.data);
                 const user = response.data.user;
-                localStorage.setItem('user', JSON.stringify(user));
+                //localStorage.setItem('user', JSON.stringify(user));
+
 
                 setUser(user);
                 navigate('/team');
