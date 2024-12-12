@@ -318,90 +318,123 @@ function Team({ user, logout }) {
                     <div className="tab-content">
                         {/* 제목 동적 변경 */}
                         <h2 className="board-title">
-                            {selectedTeamId ? "채팅" : "공지사항"}
+                            {selectedTeamId ? selectedTeamName : "공지사항"}
                         </h2>
 
                         {activeTab === "공지사항" && (
                             <div className="board">
                                 {selectedTeamId ? (
-                                    // 채팅 UI 유지
+                                    // 채팅 UI
                                     <>
-                                        {/* ... 채팅 관련 코드 */}
+                                        <div className="chat-messages">
+                                            <ul>
+                                                {chatMessages.map((msg) => {
+                                                    const isMyMessage = String(msg.userId) === String(user._id);
+                                                    const time = new Date(msg.timestamp).toLocaleString("ko-KR", {
+                                                        hour: "2-digit",
+                                                        minute: "2-digit",
+                                                        hour12: false, // 24시간 형식
+                                                    });
+
+                                                    return isMyMessage ? (
+                                                        <div className="myChat">
+                                                            <li key={msg._id} style={{ textAlign: "right" }}>
+                                                                <span style={{ color: "gray", marginRight: "8px" }}>{time}</span>
+                                                                <strong>{msg.message}</strong>
+                                                            </li>
+                                                        </div>
+                                                    ) : (
+                                                        <div className="notMyChat">
+                                                            <li key={msg._id}>
+                                                                <strong>{msg.userName}</strong> : {msg.message}
+                                                                <span style={{ marginLeft: "8px", color: "gray" }}>{time}</span>
+                                                            </li>
+                                                        </div>
+                                                    );
+                                                })}
+                                            </ul>
+                                        </div>
+
+                                        <div className="chat-input">
+                                            <input
+                                                type="text"
+                                                value={newMessage}
+                                                onChange={(e) => setNewMessage(e.target.value)}
+                                                placeholder="메시지를 입력하세요..."
+                                            />
+                                            <button onClick={sendMessage}>전송</button>
+                                        </div>
                                     </>
                                 ) : (
-                                    // 기존 공지사항 UI 수정
+                                    // 기존 공지사항 UI
                                     error ? (
                                         <p>{error}</p>
                                     ) : filteredEvents.length > 0 ? (
                                         <ul>
-                                            {filteredEvents
-                                                .flatMap((event) => {
-                                                    if (event.isRecurring) {
-                                                        const recurrenceEvents = [];
-                                                        const startDate = new Date(event.start);
-                                                        for (let i = 0; i < 10; i++) {
-                                                            const recurringStart = new Date(startDate);
-                                                            recurringStart.setDate(startDate.getDate() + i * 7);
-                                                            recurrenceEvents.push({
-                                                                ...event,
-                                                                start: recurringStart,
-                                                            });
-                                                        }
-                                                        return recurrenceEvents;
+                                            {filteredEvents.flatMap((event) => {
+                                                if (event.isRecurring) {
+                                                    const recurrenceEvents = [];
+                                                    const startDate = new Date(event.start);
+                                                    for (let i = 0; i < 10; i++) {
+                                                        const recurringStart = new Date(startDate);
+                                                        recurringStart.setDate(startDate.getDate() + i * 7);
+                                                        recurrenceEvents.push({
+                                                            ...event,
+                                                            start: recurringStart,
+                                                        });
                                                     }
-                                                    return [event];
-                                                })
-                                                .sort((a, b) => new Date(a.start) - new Date(b.start)) // 가까운 순으로 정렬
-                                                .map((event) => {
-                                                    const teamColor = event.teamId
-                                                        ? (() => {
-                                                            const teamIndex = teams.findIndex(
-                                                                (team) => team._id === event.teamId
-                                                            );
-                                                            return teamIndex !== -1 ? getButtonColor(teamIndex) : "#cecece";
-                                                        })()
-                                                        : "#cecece";
+                                                    return recurrenceEvents;
+                                                }
+                                                return [event];
+                                            }).map((event) => {
+                                                const teamColor = event.teamId
+                                                    ? (() => {
+                                                        const teamIndex = teams.findIndex(
+                                                            (team) => team._id === event.teamId
+                                                        );
+                                                        return teamIndex !== -1 ? getButtonColor(teamIndex) : "#cecece";
+                                                    })()
+                                                    : "#cecece";
 
-                                                    return (
-                                                        <li
-                                                            key={`${event._id}-${event.start}`}
-                                                            style={{
-                                                                backgroundColor: teamColor,
-                                                                padding: "10px",
-                                                                borderRadius: "8px",
-                                                                marginBottom: "8px",
-                                                                listStyle: "none",
-                                                            }}
-                                                        >
-                                                            <strong>{event.title}</strong> :{" "}
-                                                            {new Date(event.start).toLocaleString("ko-KR", {
-                                                                month: "long",
-                                                                day: "numeric",
-                                                                hour: "numeric",
-                                                                minute: "numeric",
-                                                                hour12: true,
-                                                            })}
-                                                            {event.place && (
-                                                                <div
-                                                                    style={{
-                                                                        marginTop: "4px",
-                                                                        fontSize: "0.9em",
-                                                                        color: "black",
-                                                                    }}
-                                                                >
-                                                                    장소: {event.place}
-                                                                </div>
-                                                            )}
-                                                        </li>
-                                                    );
-                                                })}
+                                                return (
+                                                    <li
+                                                        key={`${event._id}-${event.start}`}
+                                                        style={{
+                                                            backgroundColor: teamColor,
+                                                            padding: "10px",
+                                                            borderRadius: "8px",
+                                                            marginBottom: "8px",
+                                                            listStyle: "none",
+                                                        }}
+                                                    >
+                                                        <strong>{event.title}</strong> :{" "}
+                                                        {new Date(event.start).toLocaleString("ko-KR", {
+                                                            month: "long",
+                                                            day: "numeric",
+                                                            hour: "numeric",
+                                                            minute: "numeric",
+                                                            hour12: true,
+                                                        })}
+                                                        {event.place && (
+                                                            <div
+                                                                style={{
+                                                                    marginTop: "4px",
+                                                                    fontSize: "0.9em",
+                                                                    color: "black",
+                                                                }}
+                                                            >
+                                                                장소: {event.place}
+                                                            </div>
+                                                        )}
+                                                    </li>
+                                                );
+                                            })}
                                         </ul>
                                     ) : (
                                         <p>표시할 일정이 없습니다.</p>
                                     )
                                 )}
                             </div>
-
                         )}
 
                         {activeTab === "참여자" && (

@@ -1,0 +1,51 @@
+[33m63a49a5f[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mJuhyeong[m[33m, [m[1;31morigin/Juhyeong[m[33m, [m[1;32mmain[m[33m)[m 완..성?
+[33m7615ff04[m 중심지점,지하철역표시,이벤드데이터에모임장소필드추가
+[33md4ef421a[m Merge branch 'jeongyujin'
+[33m878a9abc[m Merge branch 'Juhyeong'
+[33m409fef08[m 그냥해봄
+[33m1ae44148[m Merge branch 'Juhyeong'
+[33m6c25b753[m 스케줄관리대충된거같음
+[33m887c850f[m Merge branch 'Juhyeong'
+[33m4d304634[m 뭔가나사빠지게동작함
+[33mf0cc5577[m hello (#1)
+[33m4ba6e2a8[m 사용자별로데이터따로저장히히
+[33m1c205f43[m 정기/비정기일정
+[33m70e6cda5[m 왜안돼시브레
+[33mb8795aca[m 전체UI수정
+[33mc22c214e[m 로그인/회원가입수정
+[33m2b48d269[m Merge branch 'main' into Juhyeong
+[33mffe7da94[m 오타수정
+[33m04c17217[m Merge branch 'Khongorzul'
+[33mf7fb5351[m 일정등록및삭제
+[33m5bea7473[m[33m ([m[1;31morigin/Khongorzul[m[33m, [m[1;32mKhongorzul[m[33m)[m login
+[33m14bedd70[m Merge branch 'Juhyeong'
+[33meb7cb8d3[m 로그인/회원가입
+[33macc31c24[m Merge pull request #4 from CSID-DGU/jangjunseo
+[33m5fc97498[m[33m ([m[1;31morigin/jangjunseo[m[33m, [m[1;32mjangjunseo[m[33m)[m make profile,add-team,main
+[33mdf312d28[m Merge pull request #3 from CSID-DGU/Juhyeong
+[33m924544a6[m 커밋테수뚜
+[33mec9f3af2[m make main & create add-team
+[33mf20f1edc[m Merge pull request #2 from CSID-DGU/Khongorzul
+[33mc488df8a[m hello
+[33m0963a749[m[33m ([m[1;32mjeongyujin[m[33m)[m Merge branch 'main' into jeongyujin
+[33m5c0b6c8b[m hello
+[33m9e5583c9[m 데베_테스트중
+[33mcdeaa27a[m ..
+[33m3b575c11[m commit
+[33md355c125[m Merge branch 'main' of https://github.com/CSID-DGU/2024-02-CSC4004-1-2-Imojeomo
+[33mb22bc74d[m basic
+[33mb4d27475[m Merge branch 'jun'
+[33m59d88125[m sad
+[33mcd08ec2b[m Merge branch 'jun'
+[33m236a6948[m hungry
+[33m9440815e[m Merge branch 'Juhyeong'
+[33m863dfe17[m mb
+[33m1a7f723c[m jb
+[33m01fd37f8[m main commit
+[33m0824498a[m branch tesetsets
+[33m25fe7f8b[m branch test 22
+[33m9cf594a9[m branch test
+[33ma7cd3ce1[m test by jun1
+[33m077d1619[m 커밋테스트
+[33m95851c0a[m Update README.md
+[33m7f767723[m Initial commit
